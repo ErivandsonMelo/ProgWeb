@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Instituto de Computação</title>
+</head>
+<body>
+    <h1>
+        Formulário de Contato
+    </h1>
+    Por favor, preencha o formulário abaixo e clique no botão Enviar Mensagem. Agradecemos por seu contato.
+    <p>
+    <form action="/processa">
+    <fieldset>
+        <legend>Dados Básicos</legend>
+        Nome <input type="text"><br>
+        E-mail <input type="email" id="email" required placeholder="seunome@dominio.com"><br>
+        Website <input type="text" value="https://">
+    </fieldset>
+    <fieldset>
+        <legend>Seu curso no Instituto de Computação</legend>
+        <input type="radio" name="curso" id="Cc"> Ciência da Computação<br>
+        <input type="radio" name="curso" id="Es"> Engenharia de Software<br>
+        <input type="radio" name="curso" id="Ec"> Engenharia da Computação<br>
+    </fieldset>
+    <fieldset>
+        <legend>Assinale as linguagens já usadas por você:</legend>
+        <label for="java">Java</label>
+        <input type="checkbox" name="lang" id="java">
+        <label for="c">C</label>
+        <input type="checkbox" name="lang" id="c">
+        <label for="c++">C++</label>
+        <input type="checkbox" name="lang" id="c++">
+        <label for="pearl">Pearl</label>
+        <input type="checkbox" name="lang" id="pearl">
+        <label for="python">Python</label>
+        <input type="checkbox" name="lang" id="python">
+        <label for="javascript">Javascript</label>
+        <input type="checkbox" name="lang" id="javascript">
+    </fieldset>
+    <fieldset>
+        <legend>Dados Complementares</legend>
+        <label for="cor">Cor Favorita</label>
+        <input type="color" name="cores" id="cor"><br>
+        <label for="data">Data de Nascimento</label>
+        <input type="date" name="datas" id="data"><br>
+        <label for="ano">Ano de Entrada em seu Curso do Icomp</label>
+        <input type="number" name="ano" min="1980" max="2024"><br>
+        <label for="nota">Nota para este Site</label>
+        <input type="range" id="nota" value="0">
+    </fieldset>
+    <fieldset>
+        <legend>Área de atuação</legend>
+        <select name="area" id="area">
+            <option value="1">Banco de Dados</option>
+            <option value="2">Engenharia de Software</option>
+            <option value="3">Inteligência Artificial</option>
+            <option value="4">Programação Web</option>
+            <option value="5">Recuperação de Informação</option>
+            <option value="6">Redes de Computadores</option>
+            <option value="7">Testes</option>
+        </select>
+    </fieldset>
+    <fieldset>
+        <legend>Submeta seu curriculo vitae</legend>
+        <input type="file" name="curriculo">
+    </fieldset>
+    <fieldset>
+        <legend>Digite sua Mensagem</legend>
+        <input type="text" name="mensagem" id="mensagem" size="50" value="Este é o valor padrão!">    
+    </fieldset>
+    <br>
+    <input type="submit" value="Resetar Dados"> <input type="submit" value="Enviar Mensagem">
+    </p>
+    </form>
+</body>
+</html>
