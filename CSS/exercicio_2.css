@@ -1,0 +1,25 @@
+body{
+    background-image: url(https://t2.tudocdn.net/678421?w=1920);
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+#fir{
+    font-weight: bold;
+    margin-left: 100px;
+    margin-top: 180px;
+    width: 400px; height: 700px;
+    background-color: transparent;
+    font-size: 40px;
+    text-align: center;
+    color: aliceblue;
+    border: 10px solid salmon;
+    border-radius: 20px;
+
+    box-shadow: 0px 0px 400px 5px black inset;
+}
+
+#sec{
+    font-size: 30px;
+    font-weight: normal;
+}
