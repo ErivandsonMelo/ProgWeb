@@ -1,0 +1,12 @@
+body {
+    background-color: beige;
+  }
+  
+  .ponto { 
+    position: absolute;
+    background-color: blue;
+    width: 10px;
+    height: 10px;
+    border-radius: 5px;
+  }
+  

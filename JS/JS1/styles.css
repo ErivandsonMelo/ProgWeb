@@ -1,0 +1,47 @@
+ody {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 10px;
+    background-color: #e0e0e0;
+    margin: 0;
+}
+.table-container {
+    margin: 6px;
+    background-color: yellow;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    overflow: hidden;
+    justify-content: center;
+}
+table {
+    border-collapse: collapse;
+    margin: 0;
+    font-size: 16px;
+    text-align: right;
+    width: 100%;
+}
+th, td {
+    padding: 5px 8px;
+    border: 1px solid #dddddd;
+}
+th {
+    background-color: #C3B1E1;
+    text-align: center;
+    color: #ffffff;
+}
+tr:nth-of-type(even) {
+    background-color: #f3f3f3;
+}
+tr:nth-of-type(odd) {
+    background-color: #ffffff;
+}
+.table-title {
+    text-align: center;
+    padding: 10px;
+    background-color: #350098;
+    color: #ffffff;
+    font-weight: bold;
+}
