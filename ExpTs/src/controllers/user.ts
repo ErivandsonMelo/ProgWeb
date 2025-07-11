@@ -2,21 +2,21 @@
 import { Request, Response } from 'express';
 import * as userService from '../services/user';
 import * as majorService from '../services/major';
+import bcrypt from 'bcryptjs'; // Certifique-se de importar bcryptjs
 
 export const create = async (req: Request, res: Response) => {
-    [cite_start]// [cite: 1948]
     if (req.method === 'GET') {
-        const majors = await majorService.getAllMajors(); [cite_start]// Fetch majors for dropdown [cite: 1949]
+        const majors = await majorService.getAllMajors();
         return res.render('user/create', { majors, layout: 'main' });
     } else { // POST request
-        const { name, email, password, confirmPassword, majorId } = req.body; [cite_start]// [cite: 1949]
+        const { name, email, password, confirmPassword, majorId } = req.body;
 
-        [cite_start]if (password !== confirmPassword) { // [cite: 1964]
+        if (password !== confirmPassword) {
             return res.status(400).send('Senhas não conferem.');
         }
 
         try {
-            await userService.createUser({ name, email, password, majorId }); [cite_start]// [cite: 1950]
+            await userService.createUser({ name, email, password, majorId });
             res.redirect('/login'); // Redirect to login after successful registration
         } catch (error: any) {
             console.error('Error creating user:', error);
@@ -29,19 +29,29 @@ export const create = async (req: Request, res: Response) => {
 };
 
 export const login = async (req: Request, res: Response) => {
-    [cite_start]// [cite: 1805]
     if (req.method === 'GET') {
         return res.render('auth/login', { layout: 'main' });
     } else { // POST request
         const { email, password } = req.body;
         try {
-            const isValid = await userService.checkAuth({ email, password }); [cite_start]// [cite: 1770]
+            const isValid = await userService.checkAuth({ email, password });
             if (isValid) {
                 const user = await userService.findUserByEmail(email);
                 if (user) {
-                    req.session.uid = user.id; [cite_start]// Store user ID in session [cite: 1761]
+                    req.session.uid = user.id; // Atribui o ID do usuário à sessão
+                    // Adicionar req.session.save() para forçar o salvamento da sessão
+                    // Isso é crucial quando resave: false em express-session
+                    req.session.save((err) => {
+                        if (err) {
+                            console.error('Error saving session:', err);
+                            return res.status(500).send('Erro ao iniciar sessão.');
+                        }
+                        res.redirect('/'); // Redireciona APÓS a sessão ser salva
+                    });
+                } else {
+                    // Este caso é raro, pois isValid já indica que o usuário foi encontrado e autenticado
+                    res.status(401).send('Email ou senha inválidos.');
                 }
-                res.redirect('/'); // Redirect to homepage or game page
             } else {
                 res.status(401).send('Email ou senha inválidos.');
             }
@@ -53,8 +63,7 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const logout = (req: Request, res: Response) => {
-    [cite_start]// [cite: 1786]
-    [cite_start]req.session.destroy((err) => { // [cite: 1788]
+    req.session.destroy((err) => {
         if (err) {
             console.error('Error destroying session:', err);
             return res.status(500).send('Erro ao sair.');
@@ -64,7 +73,6 @@ export const logout = (req: Request, res: Response) => {
 };
 
 export const editProfile = async (req: Request, res: Response) => {
-    [cite_start]// [cite: 1962]
     if (!req.session.uid) {
         return res.redirect('/login');
     }
@@ -90,7 +98,6 @@ export const editProfile = async (req: Request, res: Response) => {
 };
 
 export const changePassword = async (req: Request, res: Response) => {
-    [cite_start]// [cite: 1962]
     if (!req.session.uid) {
         return res.redirect('/login');
     }
@@ -98,9 +105,9 @@ export const changePassword = async (req: Request, res: Response) => {
     if (req.method === 'GET') {
         return res.render('user/change-password', { layout: 'main' });
     } else {
-        const { currentPassword, newPassword, confirmNewPassword } = req.body; [cite_start]// [cite: 1963]
+        const { currentPassword, newPassword, confirmNewPassword } = req.body;
 
-        [cite_start]if (newPassword !== confirmNewPassword) { // [cite: 1964]
+        if (newPassword !== confirmNewPassword) {
             return res.status(400).send('A nova senha e a confirmação não conferem.');
         }
 
@@ -110,7 +117,6 @@ export const changePassword = async (req: Request, res: Response) => {
                 return res.status(404).send('Usuário não encontrado.');
             }
 
-            [cite_start]// [cite: 1964]
             const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
             if (!isCurrentPasswordValid) {
                 return res.status(400).send('Senha atual incorreta.');

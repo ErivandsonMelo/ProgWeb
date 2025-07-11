@@ -4,7 +4,32 @@
     "module": "CommonJS",
     "outDir": "./build",
     "rootDir": "./src",
-    "strict": true,
-    "esModuleInterop": true
-  }
+    "strict": true, // Ativa várias verificações rigorosas, incluindo noImplicitThis
+    "esModuleInterop": true, // Permite importações de módulos CommonJS como ES Modules
+
+    // Adições sugeridas para o seu projeto:
+
+    // Permite importações padrão para módulos que não têm exportação padrão (ex: require() style)
+    "allowSyntheticDefaultImports": true, 
+    // Habilita a importação de arquivos .json diretamente no código TypeScript
+    "resolveJsonModule": true, 
+
+    // Onde o TypeScript deve procurar por arquivos de código fonte
+    "baseUrl": "./src", // Define o diretório base para resolução de módulos
+    "paths": { // Permite mapear caminhos para importações mais limpas (opcional, mas útil)
+      "@controllers/*": ["controllers/*"],
+      "@services/*": ["services/*"],
+      "@middlewares/*": ["middlewares/*"],
+      "@types/*": ["types/*"],
+      "@lib/*": ["lib/*"]
+    }
+  },
+  "include": [
+    "src/**/*", // Inclui todos os arquivos TypeScript na pasta src
+    "src/types/*.d.ts" // Garante que arquivos de declaração de tipo personalizados (como para a sessão) sejam incluídos
+  ],
+  "exclude": [
+    "node_modules", // Exclui a pasta node_modules da compilação
+    "build" // Exclui a pasta de saída da compilação
+  ]
 }

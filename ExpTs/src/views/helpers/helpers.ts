@@ -1,6 +1,8 @@
 // src/views/helpers/helpers.ts
+import Handlebars from 'handlebars'; // Importar Handlebars
+
 // Add equality helper for comparisons in Handlebars templates
-export function eq(arg1: any, arg2: any, options: Handlebars.HelperOptions) {
+export function eq(this: any, arg1: any, arg2: any, options: Handlebars.HelperOptions) {
     return (arg1 == arg2) ? options.fn(this) : options.inverse(this);
 }
 
@@ -13,5 +15,6 @@ export function listNodejsTechnologies(technologies: any[], options: Handlebars.
         }
     });
     result += '</ul>';
-    return new options.handlebars.SafeString(result);
+    // MUDANÇA AQUI: Usar Handlebars.SafeString diretamente
+    return new Handlebars.SafeString(result);
 }
