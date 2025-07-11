@@ -20,3 +20,14 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
 });
+
+app.use((req, res, next) => {
+  res.locals.session = req.session;
+  next();
+});
+
+app.use((req, res, next) => {
+  res.locals.loggedIn = !!req.session.user;
+  res.locals.userName = req.session.user?.name || '';
+  next();
+});

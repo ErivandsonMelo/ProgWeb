@@ -1,0 +1,21 @@
+{{! src/views/ranking/index.handlebars }}
+<h1>Ranking dos Melhores Jogadores</h1>
+
+<table class="table table-dark table-striped">
+    <thead>
+        <tr>
+            <th>Posição</th>
+            <th>Nome do Jogador</th>
+            <th>Pontuação Máxima</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each topScores}}
+        <tr>
+            <td>{{@index}}</td>
+            <td>{{user.name}}</td>
+            <td>{{score}}</td>
+        </tr>
+        {{/each}}
+    </tbody>
+</table>

@@ -1,0 +1,35 @@
+{{! src/views/game/index.handlebars }}
+<div id="gameArea" tabindex="0">
+    <div id="hud">
+        <div id="score">Pontuação: 0</div>
+        <div id="lives">
+            <img src="assets/png/life.png" alt="vida" />
+            <img src="assets/png/life.png" alt="vida" />
+            <img src="assets/png/life.png" alt="vida" />
+        </div>
+    </div>
+    <div id="player"></div>
+
+    <div id="gameOverScreen">
+        <div>GAME OVER</div>
+        <button id="restartBtn">RESTART</button>
+    </div>
+</div>
+
+<div id="deleteConfirmationModal" style="display: none; position: fixed; z-index: 1050; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.6);">
+    <div class="modal-dialog modal-dialog-centered" style="margin-top: 15%;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Confirmação de Deleção</h5>
+                <button type="button" class="btn-close" aria-label="Close" onclick="document.getElementById('deleteConfirmationModal').style.display='none';"></button>
+            </div>
+            <div class="modal-body">
+                <p id="modalMessage">Deseja mesmo apagar este item?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="cancelDeleteBtn">Cancelar</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Sim, apagar</button>
+            </div>
+        </div>
+    </div>
+</div>

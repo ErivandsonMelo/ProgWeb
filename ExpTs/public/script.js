@@ -1,5 +1,12 @@
 (() => {
     const gameArea = document.getElementById('gameArea');
+    if (!gameArea) { // Check if gameArea exists, important if script.js is loaded on non-game pages
+        console.warn('Game area not found, skipping game script initialization.');
+        // Add logic for Task 14 (modal) here, as it's not game-specific
+        setupDeleteConfirmationModal();
+        return;
+    }
+
     const player = document.getElementById('player');
     const scoreDisplay = document.getElementById('score');
     const livesDisplay = document.getElementById('lives');
@@ -178,6 +185,7 @@
       updateHUD();
       if (lives <= 0) {
         gameOver();
+        onGameOver(scoreAtual)
         return;
       }
       isDamaged = true;
@@ -190,11 +198,33 @@
     }
   
     function gameOver() {
+        [cite_start]// [cite: 1953]
       isPlaying = false;
       gameOverScreen.style.display = 'flex';
       stopSpawning();
       stopSpeedIncrease();
-      resetEnemySpeeds()
+      resetEnemySpeeds();
+  
+      // Send score to backend via AJAX
+      if (score > 0) {
+          fetch('/save-score', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ score: score }),
+          })
+          .then(response => {
+              if (response.ok) {
+                  console.log('Score saved successfully!');
+              } else {
+                  console.error('Failed to save score.');
+              }
+          })
+          .catch(error => {
+              console.error('Error sending score:', error);
+          });
+      }
     }
   
     function restartGame() {
@@ -206,7 +236,7 @@
       clearTimeout(damageTimeout);
       stopSpawning();
       stopSpeedIncrease();
-      resetEnemySpeeds()
+      resetEnemySpeeds();
   
       score = 0;
       lives = 3;
@@ -243,7 +273,9 @@
     function resetEnemySpeeds() {
       enemies.forEach(enemy => {
         const enemyType = enemyTypes.find(e => e.type === enemy.type);
-        enemy.speed = (Math.random() * (enemyType.speedMax - enemyType.speedMin) + enemyType.speedMin) * enemySpeedMultiplier;
+        if (enemyType) { // Ensure enemyType is found
+            enemy.speed = (Math.random() * (enemyType.speedMax - enemyType.speedMin) + enemyType.speedMin) * enemySpeedMultiplier;
+        }
       });
     }
   
@@ -321,6 +353,97 @@
       gameArea.focus();
     }
     init();
-  
+
+    // Task 14: Delete Confirmation Modal setup
+    function setupDeleteConfirmationModal() {
+        // Expose a global function for delete confirmation
+        window.confirmAndDelete = function(id, type) {
+            const modal = document.getElementById('deleteConfirmationModal');
+            const confirmBtn = document.getElementById('confirmDeleteBtn');
+            const cancelBtn = document.getElementById('cancelDeleteBtn');
+            const modalMessage = document.getElementById('modalMessage');
+
+            // Set the data-id and data-type attributes on the confirm button
+            confirmBtn.dataset.id = id;
+            confirmBtn.dataset.type = type;
+
+            if (type === 'major') {
+                modalMessage.textContent = 'Deseja mesmo apagar este curso?';
+            } else if (type === 'user') {
+                modalMessage.textContent = 'Deseja mesmo apagar este usuário?';
+            } else {
+                modalMessage.textContent = 'Deseja mesmo apagar este item?';
+            }
+
+            // Remove existing event listeners to prevent multiple bindings
+            confirmBtn.onclick = null;
+            cancelBtn.onclick = null;
+
+            [cite_start]// Event listener for confirm button [cite: 1947]
+            confirmBtn.onclick = function() {
+                const itemId = confirmBtn.dataset.id;
+                const itemType = confirmBtn.dataset.type;
+                fetch(`/${itemType}/remove/${itemId}`, {
+                    method: 'POST'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        console.log(`${itemType} deletado com sucesso`);
+                        window.location.reload(); // Reload the page to reflect changes
+                    } else {
+                        console.error(`Erro ao deletar ${itemType}`);
+                        alert(`Erro ao deletar ${itemType}.`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro na requisição:', error);
+                    alert('Erro na requisição.');
+                })
+                .finally(() => {
+                    modal.style.display = 'none'; // Hide modal after request
+                });
+            };
+
+            // Event listener for cancel button
+            cancelBtn.onclick = function() {
+                modal.style.display = 'none'; // Hide modal
+            };
+
+            modal.style.display = 'block'; // Show the modal
+        };
+    }
+
+    function onGameOver(score) {
+      fetch('/game-session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ score })
+      });
+    }
+
+    let selectedUserId = null;
+
+    document.querySelectorAll('.btn-delete').forEach(btn => {
+      btn.addEventListener('click', e => {
+        selectedUserId = e.target.dataset.userid;
+        document.getElementById('deleteModal').style.display = 'block';
+      });
+    });
+
+    function closeModal() {
+      document.getElementById('deleteModal').style.display = 'none';
+    }
+
+    document.getElementById('confirmDelete').addEventListener('click', () => {
+      fetch('/user/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: selectedUserId })
+      }).then(() => location.reload());
+    });
+
+    // Call modal setup if gameArea is not present (meaning it's a non-game page)
+    if (!gameArea) {
+        setupDeleteConfirmationModal();
+    }
   })();
-  
