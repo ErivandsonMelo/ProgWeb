@@ -1,0 +1,20 @@
+{{! src/views/major/create.handlebars }}
+<div class="container mt-4">
+    <h1>Criar Novo Curso</h1>
+    <form action="/major/create" method="POST">
+        <div class="mb-3">
+            <label for="name" class="form-label">Nome do Curso:</label>
+            <input type="text" class="form-control" id="name" name="name" required>
+        </div>
+        <div class="mb-3">
+            <label for="code" class="form-label">Código do Curso (ex: CC, ES):</label>
+            <input type="text" class="form-control" id="code" name="code" required maxlength="4">
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Descrição:</label>
+            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Salvar Curso</button>
+        <a href="/major" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>

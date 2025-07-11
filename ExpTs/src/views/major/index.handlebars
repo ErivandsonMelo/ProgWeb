@@ -1,0 +1,36 @@
+{{! src/views/major/index.handlebars }}
+<div class="container mt-4">
+    <h1>Lista de Cursos</h1>
+    <a href="/major/create" class="btn btn-primary mb-3">Adicionar Novo Curso</a>
+
+    {{#if majors}}
+    <table class="table table-dark table-striped">
+        <thead>
+            <tr>
+                <th>Nome</th>
+                <th>Código</th>
+                <th>Descrição</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each majors}}
+            <tr>
+                <td>{{this.name}}</td>
+                <td>{{this.code}}</td>
+                <td>{{this.description}}</td>
+                <td>
+                    <a href="/major/read/{{this.id}}" class="btn btn-info btn-sm me-2">Ver</a>
+                    <a href="/major/update/{{this.id}}" class="btn btn-warning btn-sm me-2">Editar</a>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="confirmAndDelete('{{this.id}}', 'major')">Apagar</button>
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+    {{else}}
+    <div class="alert alert-info" role="alert">
+        Nenhum curso cadastrado ainda.
+    </div>
+    {{/if}}
+</div>

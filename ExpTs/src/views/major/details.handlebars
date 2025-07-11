@@ -1,0 +1,22 @@
+{{! src/views/major/details.handlebars }}
+<div class="container mt-4">
+    <h1>Detalhes do Curso</h1>
+    {{#if major}}
+    <div class="card bg-dark text-white">
+        <div class="card-body">
+            <h5 class="card-title">{{major.name}} ({{major.code}})</h5>
+            <p class="card-text"><strong>ID:</strong> {{major.id}}</p>
+            <p class="card-text"><strong>Descrição:</strong> {{major.description}}</p>
+            <p class="card-text"><strong>Criado em:</strong> {{major.createdAt}}</p>
+            <p class="card-text"><strong>Última atualização:</strong> {{major.updatedAt}}</p>
+            <a href="/major/update/{{major.id}}" class="btn btn-warning me-2">Editar</a>
+            <button type="button" class="btn btn-danger" onclick="confirmAndDelete('{{major.id}}', 'major')">Apagar</button>
+            <a href="/major" class="btn btn-secondary ms-2">Voltar à Lista</a>
+        </div>
+    </div>
+    {{else}}
+    <div class="alert alert-danger" role="alert">
+        Curso não encontrado.
+    </div>
+    {{/if}}
+</div>

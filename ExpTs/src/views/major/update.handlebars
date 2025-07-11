@@ -1,0 +1,26 @@
+{{! src/views/major/update.handlebars }}
+<div class="container mt-4">
+    <h1>Atualizar Curso</h1>
+    {{#if major}}
+    <form action="/major/update/{{major.id}}" method="POST">
+        <div class="mb-3">
+            <label for="name" class="form-label">Nome do Curso:</label>
+            <input type="text" class="form-control" id="name" name="name" value="{{major.name}}" required>
+        </div>
+        <div class="mb-3">
+            <label for="code" class="form-label">Código do Curso (ex: CC, ES):</label>
+            <input type="text" class="form-control" id="code" name="code" value="{{major.code}}" required maxlength="4">
+        </div>
+        <div class="mb-3">
+            <label for="description" class="form-label">Descrição:</label>
+            <textarea class="form-control" id="description" name="description" rows="3">{{major.description}}</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Salvar Alterações</button>
+        <a href="/major" class="btn btn-secondary">Cancelar</a>
+    </form>
+    {{else}}
+    <div class="alert alert-danger" role="alert">
+        Curso não encontrado para atualização.
+    </div>
+    {{/if}}
+</div>

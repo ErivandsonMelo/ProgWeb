@@ -3,31 +3,23 @@ import { Request, Response } from 'express';
 import { loremIpsum } from 'lorem-ipsum';
 import * as gameSessionService from '../services/gameSession';
 
-// You might need to adjust the paths if your views are not directly under `views/main/`
-// For example, if you place game/index.handlebars in `views/game/index.handlebars`
-// then adjust res.render('game/index', ...)
-
 export const index = async (req: Request, res: Response) => {
-    [cite_start]// [cite: 1952]
-    if (!req.session.uid) { // Check if user is logged in
-        return res.redirect('/login'); [cite_start]// Redirect to login if not authenticated [cite: 1957]
+    if (!req.session.uid) {
+        return res.redirect('/login');
     }
-    // If logged in, render the game page
-    res.render('game/index', { layout: 'main' }); // Pass layout as 'main'
+    res.render('game/index', { layout: 'main' });
 };
 
 export const about = (req: Request, res: Response) => {
-    [cite_start]// [cite: 1817]
     res.render('about/index', {
         title: 'Sobre o Space Shooter',
         message: 'Space Shooter é um jogo clássico de arcade onde você controla uma nave espacial e deve destruir inimigos e asteroides, evitando colisões. O objetivo é alcançar a maior pontuação possível. Prepare-se para uma aventura intergaláctica!',
-        imagePath: '/assets/img/game_concept.png', // Assuming you have an image here
+        imagePath: '/assets/img/game_concept.png',
         layout: 'main'
     });
 };
 
 export const lorem = (req: Request, res: Response) => {
-    [cite_start]// [cite: 1831]
     const count = parseInt(req.params.count as string);
     if (isNaN(count) || count <= 0) {
         return res.status(400).send('Número de parágrafos inválido.');
@@ -41,25 +33,22 @@ export const lorem = (req: Request, res: Response) => {
 };
 
 export const hb1 = (req: Request, res: Response) => {
-    [cite_start]// [cite: 1845, 1846]
     res.render('main/hb1', {
         mensagem: 'Olá, você está aprendendo Express + HBS!',
-        layout: 'main' // Use the main layout
+        layout: 'main'
     });
 };
 
 export const hb2 = (req: Request, res: Response) => {
-    [cite_start]// [cite: 1845, 1846]
     res.render('main/hb2', {
         poweredByNodejs: true,
         name: 'Express',
         type: 'Framework',
-        layout: 'main' // Use the main layout
+        layout: 'main'
     });
 };
 
 export const hb3 = (req: Request, res: Response) => {
-    [cite_start]// [cite: 1845, 1846]
     const profes = [
         { nome: 'David Fernandes', sala: 1238 },
         { nome: 'Horácio Fernandes', sala: 1233 },
@@ -70,7 +59,6 @@ export const hb3 = (req: Request, res: Response) => {
 };
 
 export const hb4 = (req: Request, res: Response) => {
-    [cite_start]// [cite: 1864]
     const technologies = [
         { name: 'Express', type: 'Framework', poweredByNodejs: true },
         { name: 'Laravel', type: 'Framework', poweredByNodejs: false },
@@ -84,7 +72,6 @@ export const hb4 = (req: Request, res: Response) => {
 };
 
 export const saveScore = async (req: Request, res: Response) => {
-    [cite_start]// [cite: 1953]
     if (!req.session.uid) {
         return res.status(401).send('Usuário não autenticado.');
     }
@@ -102,7 +89,6 @@ export const saveScore = async (req: Request, res: Response) => {
 };
 
 export const ranking = async (req: Request, res: Response) => {
-    [cite_start]// [cite: 1954]
     try {
         const topScores = await gameSessionService.getTopScores(10);
         res.render('ranking/index', { topScores, layout: 'main' });
@@ -111,12 +97,6 @@ export const ranking = async (req: Request, res: Response) => {
         res.status(500).send('Erro ao carregar o ranking.');
     }
 };
-
-// Removed createCookie and clearCookie as they were just examples in the slides
-// You can re-add them if you need them for other purposes
-// export const createCookie = function (req: Request, res: Response) { /* ... */ };
-// export const clearCookie = function (req: Request, res: Response) { /* ... */ };
-
 
 export default {
     index,
