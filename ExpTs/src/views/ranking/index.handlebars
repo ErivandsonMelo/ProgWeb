@@ -12,7 +12,7 @@
     <tbody>
         {{#each topScores}}
         <tr>
-            <td>{{@index}}</td>
+            <td>{{sum @index 1}}</td> {{! MUDANÇA AQUI: Usar o novo helper 'sum' }}
             <td>{{user.name}}</td>
             <td>{{score}}</td>
         </tr>

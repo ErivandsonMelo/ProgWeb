@@ -2,7 +2,7 @@
 import { Request, Response } from 'express';
 import * as userService from '../services/user';
 import * as majorService from '../services/major';
-import bcrypt from 'bcryptjs'; // Certifique-se de importar bcryptjs
+import bcrypt from 'bcryptjs';
 
 export const create = async (req: Request, res: Response) => {
     if (req.method === 'GET') {
@@ -12,25 +12,45 @@ export const create = async (req: Request, res: Response) => {
         const { name, email, password, confirmPassword, majorId } = req.body;
 
         if (password !== confirmPassword) {
-            return res.status(400).send('Senhas não conferem.');
+            return res.status(400).render('user/create', {
+                layout: 'main',
+                error: 'Senhas não conferem.',
+                oldName: name,
+                oldEmail: email,
+                oldMajorId: majorId,
+                majors: await majorService.getAllMajors() // Recarrega os majors para o dropdown
+            });
         }
 
         try {
             await userService.createUser({ name, email, password, majorId });
-            res.redirect('/login'); // Redirect to login after successful registration
+            res.redirect('/login?success=registered'); // Redireciona para login com status de sucesso
         } catch (error: any) {
             console.error('Error creating user:', error);
+            let errorMessage = 'Erro ao cadastrar usuário.';
             if (error.code === 'P2002' && error.meta?.target?.includes('email')) {
-                return res.status(400).send('Email já cadastrado.');
+                errorMessage = 'Email já cadastrado.';
             }
-            res.status(500).send('Erro ao cadastrar usuário.');
+            res.status(500).render('user/create', {
+                layout: 'main',
+                error: errorMessage,
+                oldName: name,
+                oldEmail: email,
+                oldMajorId: majorId,
+                majors: await majorService.getAllMajors() // Recarrega os majors para o dropdown
+            });
         }
     }
 };
 
 export const login = async (req: Request, res: Response) => {
     if (req.method === 'GET') {
-        return res.render('auth/login', { layout: 'main' });
+        let successMessage = '';
+        // Verifica se há uma mensagem de sucesso na query string (ex: de um registro bem-sucedido)
+        if (req.query.success === 'registered') {
+            successMessage = 'Conta criada com sucesso! Faça login.';
+        }
+        return res.render('auth/login', { layout: 'main', success: successMessage });
     } else { // POST request
         const { email, password } = req.body;
         try {
@@ -38,26 +58,31 @@ export const login = async (req: Request, res: Response) => {
             if (isValid) {
                 const user = await userService.findUserByEmail(email);
                 if (user) {
-                    req.session.uid = user.id; // Atribui o ID do usuário à sessão
-                    // Adicionar req.session.save() para forçar o salvamento da sessão
-                    // Isso é crucial quando resave: false em express-session
+                    req.session.uid = user.id;
                     req.session.save((err) => {
                         if (err) {
                             console.error('Error saving session:', err);
                             return res.status(500).send('Erro ao iniciar sessão.');
                         }
-                        res.redirect('/'); // Redireciona APÓS a sessão ser salva
+                        res.redirect('/');
                     });
                 } else {
-                    // Este caso é raro, pois isValid já indica que o usuário foi encontrado e autenticado
-                    res.status(401).send('Email ou senha inválidos.');
+                    res.status(401).render('auth/login', {
+                        layout: 'main',
+                        error: 'Email ou senha inválidos.',
+                        oldEmail: email
+                    });
                 }
             } else {
-                res.status(401).send('Email ou senha inválidos.');
+                res.status(401).render('auth/login', {
+                    layout: 'main',
+                    error: 'Email ou senha inválidos.',
+                    oldEmail: email
+                });
             }
         } catch (error) {
             console.error('Login error:', error);
-            res.status(500).send('Erro no servidor.');
+            res.status(500).send('Erro no servidor.'); // Para erros inesperados
         }
     }
 };
@@ -68,7 +93,7 @@ export const logout = (req: Request, res: Response) => {
             console.error('Error destroying session:', err);
             return res.status(500).send('Erro ao sair.');
         }
-        res.redirect('/');
+        res.redirect('/login?success=logged_out'); // Redireciona para login com status de logout
     });
 };
 
@@ -88,12 +113,27 @@ export const editProfile = async (req: Request, res: Response) => {
             return res.render('user/edit-profile', { user, majors, layout: 'main' });
         } else { // POST request
             const { name, email, majorId } = req.body;
-            await userService.updateUser(user.id, { name, email, majorId });
-            res.redirect('/'); // Redirect after update
+            try {
+                await userService.updateUser(user.id, { name, email, majorId });
+                res.redirect('/profile/edit?success=updated'); // Redireciona para a mesma página com sucesso
+            } catch (error: any) {
+                console.error('Error updating profile:', error);
+                 let errorMessage = 'Erro ao atualizar perfil.';
+                if (error.code === 'P2002' && error.meta?.target?.includes('email')) {
+                    errorMessage = 'Email já cadastrado.';
+                }
+                const majors = await majorService.getAllMajors(); // Recarrega os majors
+                res.status(500).render('user/edit-profile', {
+                    layout: 'main',
+                    error: errorMessage,
+                    user: { ...user, name, email, majorId }, // Mantém dados submetidos
+                    majors
+                });
+            }
         }
     } catch (error) {
-        console.error('Error editing profile:', error);
-        res.status(500).send('Erro ao atualizar perfil.');
+        console.error('Error in editProfile:', error);
+        res.status(500).send('Erro no servidor ao carregar/processar perfil.');
     }
 };
 
@@ -103,12 +143,19 @@ export const changePassword = async (req: Request, res: Response) => {
     }
 
     if (req.method === 'GET') {
-        return res.render('user/change-password', { layout: 'main' });
+        let successMessage = '';
+        if (req.query.success === 'changed') {
+            successMessage = 'Senha alterada com sucesso!';
+        }
+        return res.render('user/change-password', { layout: 'main', success: successMessage });
     } else {
         const { currentPassword, newPassword, confirmNewPassword } = req.body;
 
         if (newPassword !== confirmNewPassword) {
-            return res.status(400).send('A nova senha e a confirmação não conferem.');
+            return res.status(400).render('user/change-password', {
+                layout: 'main',
+                error: 'A nova senha e a confirmação não conferem.'
+            });
         }
 
         try {
@@ -119,11 +166,14 @@ export const changePassword = async (req: Request, res: Response) => {
 
             const isCurrentPasswordValid = await bcrypt.compare(currentPassword, user.password);
             if (!isCurrentPasswordValid) {
-                return res.status(400).send('Senha atual incorreta.');
+                return res.status(400).render('user/change-password', {
+                    layout: 'main',
+                    error: 'Senha atual incorreta.'
+                });
             }
 
             await userService.updatePassword(user.id, newPassword);
-            res.redirect('/'); // Redirect after password change
+            res.redirect('/profile/change-password?success=changed'); // Redireciona para a mesma página com sucesso
         } catch (error) {
             console.error('Error changing password:', error);
             res.status(500).send('Erro ao alterar senha.');
@@ -135,7 +185,7 @@ export const changePassword = async (req: Request, res: Response) => {
 export const index = async (req: Request, res: Response) => {
     try {
         const users = await userService.getAllUsers();
-        res.render('user/index', { users, layout: 'main' }); // Assuming a user listing page
+        res.render('user/index', { users, layout: 'main' });
     } catch (error) {
         console.error('Error fetching users:', error);
         res.status(500).send('Erro ao carregar lista de usuários.');

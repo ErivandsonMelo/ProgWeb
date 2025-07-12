@@ -1,83 +1,89 @@
+// src/index.ts
 import express from 'express';
 import dotenv from 'dotenv';
 import validateEnv from './utils/validateEnv';
 import path from 'path';
-import session from 'express-session'; // Importar express-session
-import { v4 as uuidv4 } from 'uuid'; // Importar uuid para gerar IDs de sessão
-import { engine } from 'express-handlebars'; // Importar express-handlebars
-import router from './router/router'; // Importar seu roteador principal
-import { PrismaClient } from '@prisma/client'; // Importar PrismaClient
+import session from 'express-session';
+import { v4 as uuidv4 } from 'uuid';
+import { engine } from 'express-handlebars';
+import router from './router/router';
 
+// MUDANÇA CRÍTICA:
+// 1. CARREGUE AS VARIÁVEIS DE AMBIENTE PRIMEIRO
 dotenv.config();
-validateEnv(); // Validar variáveis de ambiente
+validateEnv();
+
+// 2. SÓ ENTÃO IMPORTE A INSTÂNCIA DO PRISMA
+//    Isso garante que process.env.DATABASE_URL já está disponível
+import prisma from './lib/prisma'; // MOVIDO PARA AQUI
 
 const app = express();
 const PORT = process.env.PORT || 3333;
-const prisma = new PrismaClient(); // Instanciar o PrismaClient
+// REMOVIDO: const prisma = new PrismaClient(); // Esta linha DEVE ter sido removida.
 
 // Estender a interface SessionData para incluir 'uid'
 declare module 'express-session' {
     interface SessionData {
-        uid: string; // Adicionar a propriedade 'uid' à SessionData para armazenar o ID do usuário
+        uid: string;
     }
 }
 
-// Configuração do middleware de sessão
+// Configuração do middleware de sessão (primeiro)
 app.use(session({
-    genid: () => uuidv4(), // Gerar IDs de sessão únicos usando UUID
-    secret: process.env.SESSION_SECRET || 'fallback_secret_key_if_env_is_missing', // Usar uma chave secreta do .env
-    resave: false, // Não salvar a sessão no "store" se não houver modificações
-    saveUninitialized: false, // Não criar uma sessão para um usuário não inicializado
+    genid: () => uuidv4(),
+    secret: process.env.SESSION_SECRET || 'fallback_secret_key_if_env_is_missing',
+    resave: false,
+    saveUninitialized: false,
     cookie: {
-        maxAge: 1000 * 60 * 60 * 24 // Cookie expira em 24 horas (opcional, mas boa prática)
+        maxAge: 1000 * 60 * 60 * 24
     }
 }));
 
-// Middleware para analisar corpos de requisição URL-encoded (para formulários HTML)
+// Middlewares para analisar corpos de requisição (depois da sessão)
 app.use(express.urlencoded({ extended: false }));
-// Middleware para analisar corpos de requisição JSON (para requisições AJAX)
 app.use(express.json());
 
 // Configurar Handlebars como o motor de visualização
 app.engine('handlebars', engine({
-    defaultLayout: 'main', // Define 'main.handlebars' como o layout padrão
-    layoutsDir: path.join(__dirname, '..', 'src', 'views', 'layouts'), // Caminho para o diretório de layouts
-    partialsDir: path.join(__dirname, '..', 'src', 'views', 'partials'), // Caminho para o diretório de partials (se você os usa)
+    defaultLayout: 'main',
+    layoutsDir: path.join(__dirname, '..', 'src', 'views', 'layouts'),
+    partialsDir: path.join(__dirname, '..', 'src', 'views', 'partials'),
     helpers: {
-        // Carrega helpers do Handlebars, como o 'eq' para comparações
         eq: require('./views/helpers/helpers').eq,
-        listNodejsTechnologies: require('./views/helpers/helpers').listNodejsTechnologies, // Exemplo de helper para Task 8
+        listNodejsTechnologies: require('./views/helpers/helpers').listNodejsTechnologies,
+        sum: require('./views/helpers/helpers').sum, // MUDANÇA AQUI: Adicionar o helper 'sum'
     }
 }));
-app.set('view engine', 'handlebars'); // Define Handlebars como o motor de visualização
-app.set('views', path.join(__dirname, '..', 'src', 'views')); // Define o diretório das views
-
-// Middleware para servir arquivos estáticos do diretório /public
-app.use(express.static(path.join(__dirname, '..', 'public')));
+app.set('view engine', 'handlebars');
+app.set('views', path.join(__dirname, '..', 'src', 'views'));
 
 // Middleware para anexar dados da sessão e informações do usuário a res.locals para Handlebars
 app.use(async (req, res, next) => {
-    // res.locals.session = req.session; // Esta linha pode ser removida se você usar diretamente loggedIn/userName
-    res.locals.loggedIn = !!req.session.uid; // Verifica se 'uid' existe na sessão para determinar se o usuário está logado
-    if (req.session.uid) { // Se 'uid' existe, tenta buscar o nome do usuário
+    res.locals.loggedIn = !!req.session.uid;
+    if (req.session.uid) {
         try {
             const user = await prisma.user.findUnique({
                 where: { id: req.session.uid },
-                select: { name: true } // Seleciona apenas o nome do usuário
+                select: { name: true }
             });
-            res.locals.userName = user ? user.name : 'Usuário'; // Define o nome do usuário para a view
+            res.locals.userName = user ? user.name : 'Usuário';
         } catch (error) {
             console.error('Error fetching user for navbar:', error);
-            res.locals.userName = 'Usuário'; // Fallback em caso de erro
+            res.locals.userName = 'Usuário';
         }
     }
     next();
 });
 
 // Usar o roteador principal para todas as rotas da aplicação
-// Este middleware deve ser o último após todas as configurações de middleware globais
-app.use(router); //
+app.use(router);
+
+// Middleware para servir arquivos estáticos do diretório /public (ÚLTIMO)
+app.use(express.static(path.join(__dirname, '..', 'public')));
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando em http://localhost:${PORT}`);
+}).on('error', (err: any) => {
+  console.error('Erro no servidor Express:', err.message);
+  process.exit(1);
 });

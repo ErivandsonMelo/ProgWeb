@@ -3,7 +3,7 @@ import { PrismaClient, User } from '@prisma/client';
 import { UserCreateDto, LoginDto, UserUpdateDto } from '../types/user';
 import bcrypt from 'bcryptjs';
 
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma';
 
 export const createUser = async (userData: UserCreateDto): Promise<User> => {
     const salt = await bcrypt.genSalt(10); // Gera um salt aleatório para a senha

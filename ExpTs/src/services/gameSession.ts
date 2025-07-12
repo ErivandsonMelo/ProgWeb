@@ -1,7 +1,7 @@
 // src/services/gameSession.ts
 import { PrismaClient, GameSession } from '@prisma/client';
 
-const prisma = new PrismaClient();
+import prisma from '../lib/prisma';
 
 export const createGameSession = async (userId: string, score: number): Promise<GameSession> => {
     return await prisma.gameSession.create({

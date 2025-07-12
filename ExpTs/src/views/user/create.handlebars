@@ -1,37 +1,44 @@
 {{! src/views/user/create.handlebars }}
-<h1>Criar Conta</h1>
-<form action="/register" method="POST">
-    <div class="mb-3">
-        <label for="name" class="form-label">Nome Completo:</label>
-        <input type="text" class="form-control" id="name" name="name" required>
-    </div>
-    <div class="mb-3">
-        <label for="email" class="form-label">Email:</label>
-        <input type="email" class="form-control" id="email" name="email" required>
-    </div>
-    <div class="mb-3">
-        <label for="password" class="form-label">Senha:</label>
-        <input type="password" class="form-control" id="password" name="password" required>
-    </div>
-    <div class="mb-3">
-        <label for="confirmPassword" class="form-label">Repetir Senha:</label>
-        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
-    </div>
-    <div class="mb-3">
-        <label for="majorId" class="form-label">Curso:</label>
-        <select class="form-select" id="majorId" name="majorId" required>
-            <option value="">Selecione um curso</option>
-            {{#each majors}}
-            <option value="{{id}}">{{name}} ({{code}})</option>
-            {{/each}}
-        </select>
-    </div>
-    <button type="submit" class="btn btn-primary">Cadastrar</button>
-</form>
-<div class="modal" id="deleteModal">
-  <div class="modal-content">
-    <p>Tem certeza que deseja excluir?</p>
-    <button id="confirmDelete">Confirmar</button>
-    <button onclick="closeModal()">Cancelar</button>
-  </div>
+<div class="container mt-4">
+    <h1>Criar Conta</h1>
+
+    {{#if error}}
+        <div class="alert alert-danger" role="alert">
+            {{error}}
+        </div>
+    {{/if}}
+    {{#if success}}
+        <div class="alert alert-success" role="alert">
+            {{success}}
+        </div>
+    {{/if}}
+
+    <form action="/register" method="POST">
+        <div class="mb-3">
+            <label for="name" class="form-label">Nome Completo:</label>
+            <input type="text" class="form-control" id="name" name="name" value="{{oldName}}" required>
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email:</label>
+            <input type="email" class="form-control" id="email" name="email" value="{{oldEmail}}" required>
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Senha:</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+        </div>
+        <div class="mb-3">
+            <label for="confirmPassword" class="form-label">Repetir Senha:</label>
+            <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+        </div>
+        <div class="mb-3">
+            <label for="majorId" class="form-label">Curso:</label>
+            <select class="form-select" id="majorId" name="majorId" required>
+                <option value="">Selecione um curso</option>
+                {{#each majors}}
+                <option value="{{id}}" {{#if (eq id ../oldMajorId)}}selected{{/if}}>{{name}} ({{code}})</option>
+                {{/each}}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Cadastrar</button>
+    </form>
 </div>

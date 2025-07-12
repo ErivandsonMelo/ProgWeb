@@ -1,12 +1,18 @@
 (() => {
     const gameArea = document.getElementById('gameArea');
-    if (!gameArea) { // Check if gameArea exists, important if script.js is loaded on non-game pages
-        console.warn('Game area not found, skipping game script initialization.');
-        // Add logic for Task 14 (modal) here, as it's not game-specific
+    
+    // Check if gameArea exists, important if script.js is loaded on non-game pages
+    // If not on game page, setup only the general delete confirmation modal
+    if (!gameArea) { 
         setupDeleteConfirmationModal();
+        // Remove the outdated modal and button listeners if gameArea is not present
+        const oldDeleteModal = document.getElementById('deleteModal');
+        if (oldDeleteModal) oldDeleteModal.remove();
+        document.querySelectorAll('.btn-delete').forEach(btn => btn.removeEventListener('click', null));
         return;
     }
 
+    // --- Game Specific Logic (only if gameArea exists) ---
     const player = document.getElementById('player');
     const scoreDisplay = document.getElementById('score');
     const livesDisplay = document.getElementById('lives');
@@ -185,7 +191,7 @@
       updateHUD();
       if (lives <= 0) {
         gameOver();
-        onGameOver(scoreAtual)
+        // REMOVIDO: onGameOver(scoreAtual) - Já é chamado dentro de gameOver()
         return;
       }
       isDamaged = true;
@@ -198,7 +204,6 @@
     }
   
     function gameOver() {
-        [cite_start]// [cite: 1953]
       isPlaying = false;
       gameOverScreen.style.display = 'flex';
       stopSpawning();
@@ -358,10 +363,16 @@
     function setupDeleteConfirmationModal() {
         // Expose a global function for delete confirmation
         window.confirmAndDelete = function(id, type) {
-            const modal = document.getElementById('deleteConfirmationModal');
-            const confirmBtn = document.getElementById('confirmDeleteBtn');
-            const cancelBtn = document.getElementById('cancelDeleteBtn');
-            const modalMessage = document.getElementById('modalMessage');
+            // Inicializa o modal Bootstrap, ele precisa estar no DOM (main.handlebars)
+            const modalElement = document.getElementById('deleteConfirmationModal');
+            if (!modalElement) {
+                console.error('Delete confirmation modal element not found!');
+                return;
+            }
+            const modal = new bootstrap.Modal(modalElement); 
+
+            const confirmBtn = modalElement.querySelector('#confirmDeleteBtn');
+            const modalMessage = modalElement.querySelector('#modalMessage');
 
             // Set the data-id and data-type attributes on the confirm button
             confirmBtn.dataset.id = id;
@@ -375,44 +386,43 @@
                 modalMessage.textContent = 'Deseja mesmo apagar este item?';
             }
 
-            // Remove existing event listeners to prevent multiple bindings
-            confirmBtn.onclick = null;
-            cancelBtn.onclick = null;
+            // Remove previous event listener to avoid multiple bindings
+            const oldConfirmBtn = confirmBtn.cloneNode(true);
+            confirmBtn.parentNode.replaceChild(oldConfirmBtn, confirmBtn);
 
-            [cite_start]// Event listener for confirm button [cite: 1947]
-            confirmBtn.onclick = function() {
-                const itemId = confirmBtn.dataset.id;
-                const itemType = confirmBtn.dataset.type;
+            oldConfirmBtn.addEventListener('click', function() {
+                const itemId = oldConfirmBtn.dataset.id;
+                const itemType = oldConfirmBtn.dataset.type;
                 fetch(`/${itemType}/remove/${itemId}`, {
                     method: 'POST'
                 })
                 .then(response => {
                     if (response.ok) {
                         console.log(`${itemType} deletado com sucesso`);
-                        window.location.reload(); // Reload the page to reflect changes
+                        modal.hide(); // Esconde o modal Bootstrap
+                        window.location.reload(); // Recarrega a página
                     } else {
                         console.error(`Erro ao deletar ${itemType}`);
                         alert(`Erro ao deletar ${itemType}.`);
+                        modal.hide(); // Esconde o modal Bootstrap
                     }
                 })
                 .catch(error => {
                     console.error('Erro na requisição:', error);
                     alert('Erro na requisição.');
-                })
-                .finally(() => {
-                    modal.style.display = 'none'; // Hide modal after request
+                    modal.hide(); // Esconde o modal Bootstrap
                 });
-            };
+            });
 
-            // Event listener for cancel button
-            cancelBtn.onclick = function() {
-                modal.style.display = 'none'; // Hide modal
-            };
+            // O botão de cancelar do modal Bootstrap já tem data-bs-dismiss="modal"
+            // então não precisa de um listener separado para fechar.
 
-            modal.style.display = 'block'; // Show the modal
+            modal.show(); // Exibe o modal Bootstrap
         };
     }
 
+    // REMOVIDO: Lógica antiga de modal de deleção (duplicada/conflitante)
+    /*
     function onGameOver(score) {
       fetch('/game-session', {
         method: 'POST',
@@ -441,6 +451,7 @@
         body: JSON.stringify({ id: selectedUserId })
       }).then(() => location.reload());
     });
+    */
 
     // Call modal setup if gameArea is not present (meaning it's a non-game page)
     if (!gameArea) {

@@ -1,22 +1,36 @@
 {{! src/views/user/edit-profile.handlebars }}
-<h1>Editar Perfil</h1>
-<form action="/profile/edit" method="POST">
-    <div class="mb-3">
-        <label for="name" class="form-label">Nome Completo:</label>
-        <input type="text" class="form-control" id="name" name="name" value="{{user.name}}" required>
-    </div>
-    <div class="mb-3">
-        <label for="email" class="form-label">Email:</label>
-        <input type="email" class="form-control" id="email" name="email" value="{{user.email}}" required>
-    </div>
-    <div class="mb-3">
-        <label for="majorId" class="form-label">Curso:</label>
-        <select class="form-select" id="majorId" name="majorId" required>
-            <option value="">Selecione um curso</option>
-            {{#each majors}}
-            <option value="{{id}}" {{#if (eq id ../user.majorId)}}selected{{/if}}>{{name}} ({{code}})</option>
-            {{/each}}
-        </select>
-    </div>
-    <button type="submit" class="btn btn-primary">Atualizar</button>
-</form>
+<div class="container mt-4">
+    <h1>Editar Perfil</h1>
+
+    {{#if error}}
+        <div class="alert alert-danger" role="alert">
+            {{error}}
+        </div>
+    {{/if}}
+    {{#if success}}
+        <div class="alert alert-success" role="alert">
+            {{success}}
+        </div>
+    {{/if}}
+
+    <form action="/profile/edit" method="POST">
+        <div class="mb-3">
+            <label for="name" class="form-label">Nome Completo:</label>
+            <input type="text" class="form-control" id="name" name="name" value="{{user.name}}" required>
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email:</label>
+            <input type="email" class="form-control" id="email" name="email" value="{{user.email}}" required>
+        </div>
+        <div class="mb-3">
+            <label for="majorId" class="form-label">Curso:</label>
+            <select class="form-select" id="majorId" name="majorId" required>
+                <option value="">Selecione um curso</option>
+                {{#each majors}}
+                <option value="{{id}}" {{#if (eq id ../user.majorId)}}selected{{/if}}>{{name}} ({{code}})</option>
+                {{/each}}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Atualizar</button>
+    </form>
+</div>
